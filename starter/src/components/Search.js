@@ -1,22 +1,25 @@
 import "../App.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import BookCard from "./BookCard";
-import { getAll, search } from "../BooksAPI";
+import { getAll, search, update } from "../BooksAPI";
 import { Link } from "react-router-dom";
+import { debounce } from "lodash";
 
 export default function Search() {
   const [books, setBooks] = useState([]);
   const [booksOnMyShelt, setBooksOnMyShelf] = useState([]);
 
-  const handleSearch = async (value) => {
-    if (value.target.value) {
-      const data = await search(value.target.value);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleCallApiSearch = useCallback(
+    debounce(async (query) => {
+      const data = await search(query);
       if (!data.error) {
         let newBook = [...data];
         booksOnMyShelt.forEach((bookOnMyShelt) => {
-          const indexBook = books.findIndex(
-            (book) => book.id === bookOnMyShelt.id
-          );
+          const indexBook = data.findIndex((book) => {
+            return book.id === bookOnMyShelt.id;
+          });
+          console.log(indexBook);
           if (indexBook > -1) {
             newBook[indexBook] = {
               ...newBook[indexBook],
@@ -24,20 +27,29 @@ export default function Search() {
             };
           }
         });
-        setBooks(newBook);
+        setBooks(newBook.filter((book) => book.imageLinks?.thumbnail));
       } else {
         setBooks([]);
       }
+    }, 1000),
+    [booksOnMyShelt]
+  );
+
+  const handleSearch = async (value) => {
+    if (value.target.value) {
+      handleCallApiSearch(value.target.value);
     } else {
       setBooks([]);
     }
   };
 
+  const handleUpdateBook = (book, shelf) => {
+    book.shelf = shelf;
+    update(book, shelf);
+  };
+
   useEffect(() => {
-    (async function () {
-      const data = await getAll();
-      setBooksOnMyShelf(data);
-    })();
+    getAll().then((res) => setBooksOnMyShelf(res));
   }, []);
 
   return (
@@ -57,7 +69,11 @@ export default function Search() {
       <div className="search-books-results">
         <ol className="books-grid">
           {books.map((value) => (
-            <BookCard book={value} key={value.id} />
+            <BookCard
+              book={value}
+              key={value.id}
+              onUpdateShelf={handleUpdateBook}
+            />
           ))}
         </ol>
       </div>

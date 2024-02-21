@@ -1,6 +1,6 @@
 import "../App.css";
 import { useState, useEffect } from "react";
-import { getAll } from "../BooksAPI";
+import { getAll, update } from "../BooksAPI";
 import {
   getCurrentlyReadingBook,
   getReadBook,
@@ -14,6 +14,13 @@ function ListBook() {
   const getAllBook = async () => {
     const data = await getAll();
     setBooks(data);
+  };
+
+  const handleUpdateBook = (book, shelf) => {
+    book.shelf = shelf;
+    update(book, shelf).then(() => {
+      setBooks([...books.filter((b) => b.id !== book.id), book]);
+    });
   };
 
   useEffect(() => {
@@ -35,7 +42,7 @@ function ListBook() {
                   {getCurrentlyReadingBook(books).map((value) => (
                     <BookCard
                       book={value}
-                      onGetAllBook={getAllBook}
+                      onUpdateShelf={handleUpdateBook}
                       key={value.id}
                     />
                   ))}
@@ -49,7 +56,7 @@ function ListBook() {
                   {getWantToReadBook(books).map((value) => (
                     <BookCard
                       book={value}
-                      onGetAllBook={getAllBook}
+                      onUpdateShelf={handleUpdateBook}
                       key={value.id}
                     />
                   ))}
@@ -63,7 +70,7 @@ function ListBook() {
                   {getReadBook(books).map((value) => (
                     <BookCard
                       book={value}
-                      onGetAllBook={getAllBook}
+                      onUpdateShelf={handleUpdateBook}
                       key={value.id}
                     />
                   ))}

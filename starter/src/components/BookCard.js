@@ -56,17 +56,18 @@ export default function BookCard({ book, onUpdateShelf }) {
                 ))}
               </select>
             ) : (
-              <select onChange={handleChangeShelf} value="add">
+              <select
+                onChange={handleChangeShelf}
+                value={book.shelf ? book.shelf : "none"}
+              >
                 <option value="add" disabled>
                   Add to...
                 </option>
-                {shelves
-                  .filter((x) => x.id !== 4)
-                  .map((x) => (
-                    <option key={x.id} value={x.shelfName}>
-                      {x.shelfDisplayName}
-                    </option>
-                  ))}
+                {shelves.map((x) => (
+                  <option key={x.id} value={x.shelfName}>
+                    {x.shelfDisplayName}
+                  </option>
+                ))}
               </select>
             )}
             <select></select>

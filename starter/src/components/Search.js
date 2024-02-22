@@ -19,7 +19,6 @@ export default function Search() {
           const indexBook = data.findIndex((book) => {
             return book.id === bookOnMyShelt.id;
           });
-          console.log(indexBook);
           if (indexBook > -1) {
             newBook[indexBook] = {
               ...newBook[indexBook],
